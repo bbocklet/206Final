@@ -30,7 +30,7 @@ def taylorData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        releaseDate = obj['releaseDate'][:10]
 
         cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artistsName, trackName, album, releaseDate) VALUES (?,?,?,?,?)', (song_id, artistName, trackName, album, releaseDate))
 
@@ -45,13 +45,18 @@ def harryData(cur, conn):
 
     dataHarry = responseHarry.json()
 
+    song_id = 51
     for obj in dataHarry["results"]:
-        artist_id = 2
-        trackName = obj["trackName"]
         artistName= obj["artistName"]
-        print(trackName)
-        print(artistName)
-        print("+++++++")
+        trackName = obj["trackName"]
+        album = obj['collectionName']
+        releaseDate = obj['releaseDate'][:10]
+
+        cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artistsName, trackName, album, releaseDate) VALUES (?,?,?,?,?)', (song_id, artistName, trackName, album, releaseDate))
+
+        song_id += 1
+    
+    conn.commit()
 
 
 def main():
@@ -59,6 +64,7 @@ def main():
     cur, conn = setUpDatabase('music.db')
     create_taylorHarry_table(cur, conn)
     taylorData(cur, conn)
+    harryData(cur, conn)
 
 if __name__ == "__main__":
     main()
