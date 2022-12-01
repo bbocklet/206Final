@@ -12,7 +12,7 @@ def setUpDatabase(db_name):
     return cur, conn
 
 def create_taylorHarry_table(cur, conn):
-    cur.execute("drop table if exists taylorHarry")
+    # cur.execute("drop table if exists taylorHarry")
     cur.execute("CREATE TABLE IF NOT EXISTS taylorHarry (song_id INTEGER PRIMARY KEY, artistsName TEXT, trackName TEXT, album TEXT, releaseDate TEXT)")
     conn.commit()
     pass
@@ -30,7 +30,7 @@ def taylorData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate'][:10]
+        releaseDate = obj['releaseDate']
 
         cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artistsName, trackName, album, releaseDate) VALUES (?,?,?,?,?)', (song_id, artistName, trackName, album, releaseDate))
 
@@ -50,7 +50,9 @@ def harryData(cur, conn):
         artistName= obj["artistName"]
         trackName = obj["trackName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate'][:10]
+        releaseDate = obj['releaseDate']
+
+        print(song_id, artistName, trackName, album, releaseDate)
 
         cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artistsName, trackName, album, releaseDate) VALUES (?,?,?,?,?)', (song_id, artistName, trackName, album, releaseDate))
 
