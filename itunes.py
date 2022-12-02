@@ -25,16 +25,21 @@ def taylorData(cur, conn):
     dataTaylor = responseTaylor.json()
     # print(dataTaylor)
     song_id = 1
+    current = 1
+    end = 25
 
     for obj in dataTaylor["results"]:
-        trackName = obj["trackName"]
-        artistName= obj["artistName"]
-        album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        while current < end:
+            trackName = obj["trackName"]
+            artistName= obj["artistName"]
+            album = obj['collectionName']
+            releaseDate = obj['releaseDate']
 
-        cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artistsName, trackName, album, releaseDate) VALUES (?,?,?,?,?)', (song_id, artistName, trackName, album, releaseDate))
-
-        song_id += 1
+            cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artistsName, trackName, album, releaseDate) VALUES (?,?,?,?,?)', (song_id, artistName, trackName, album, releaseDate))
+                
+            song_id += 1
+        current += 1
+        
     
     conn.commit()
 
@@ -70,3 +75,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    #  check data to database, insert 25 into database at a time
+    # select max or select count from the column 
+    #  im going to insert -- make sure not duplicated!!
