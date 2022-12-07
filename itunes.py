@@ -318,49 +318,45 @@ def join_calc_visual(cur, conn):
     for key in theMost:
         percentages[key] = round((theMost[key] / totalSongs) * 100,2)
 
-# make the pie chart values
-
-# lables need to be the artist name and sizes will be the percentage
-    
-    # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+# make the pie chart values according to values in the percentages dictionary
 
     if 'Taylor Swift' in theMost.keys():
-        taylorVal = theMost['Taylor Swift']
+        taylorVal = percentages['Taylor Swift']
     else:
         taylorVal = 0
 
     if 'Harry Styles' in theMost.keys():
-        harryVal = theMost['Harry Styles']
+        harryVal = percentages['Harry Styles']
     else:
         harryVal = 0
 
     if 'Drake' in theMost.keys():
-        drakeVal = theMost['Drake']
+        drakeVal = percentages['Drake']
     else:
         drakeVal = 0
 
     if 'Noah Kahan' in theMost.keys():
-        noahVal = theMost['Noah Kahan']
+        noahVal = percentages['Noah Kahan']
     else:
         noahVal = 0
     
     if 'Gryffin, Seven Lions & Noah Kahan' in theMost.keys():
-        noahVal2 = theMost['Gryffin, Seven Lions & Noah Kahan']
+        noahVal2 = percentages['Gryffin, Seven Lions & Noah Kahan']
     else:
         noahVal2 = 0
     
     if 'Mac Miller' in theMost.keys():
-        macVal = theMost['Mac Miller']
+        macVal = percentages['Mac Miller']
     else:
         macVal = 0
 
     if 'One Direction' in theMost.keys():
-        oneVal = theMost['One Direction']
+        oneVal = percentages['One Direction']
     else:
         oneVal = 0
 
-    labels = 'Taylor Swift', 'Harry Styles', 'Drake', 'Gryffin, Seven Lions & Noah Kahan', 'Noah Kahan', 'Mac Miller', 'One Direction'
-    sizes = [taylorVal, harryVal, drakeVal, noahVal2, noahVal, macVal, oneVal]
+    labels = 'Taylor Swift', 'One Direction', 'Harry Styles', 'Drake', 'Gryffin, Seven Lions & Noah Kahan', 'Noah Kahan', 'Mac Miller'
+    sizes = [taylorVal, oneVal, harryVal, drakeVal, noahVal2, noahVal, macVal]
     explode = (0, 0, 0, 0, 0, 0, 0)  
 
     fig1, ax1 = plt.subplots()
@@ -399,8 +395,8 @@ def main():
     drakeData(cur, conn)
     noahData(cur, conn)
     macData(cur, conn)
-    join_calc_visual(cur, conn)
     writeFile(join_calc_visual(cur, conn), "blairData.csv")
+    join_calc_visual(cur, conn)
 
 if __name__ == "__main__":
     main()
