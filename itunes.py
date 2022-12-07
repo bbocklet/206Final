@@ -13,7 +13,7 @@ def setUpDatabase(db_name):
 
 def create_taylorHarry_table(cur, conn):
     # cur.execute("drop table if exists taylorHarry")
-    cur.execute("CREATE TABLE IF NOT EXISTS taylorHarry (song_id INTEGER, artist_id INTEGER, trackName TEXT PRIMARY KEY, album_id INTEGER, releaseDate TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS taylorHarry (song_id INTEGER, artist_id INTEGER, trackName TEXT PRIMARY KEY, album_id INTEGER, releaseDate INTEGER)")
     conn.commit()
     pass
 
@@ -42,7 +42,7 @@ def taylorData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        releaseDate = int(obj['releaseDate'][:4])
         artist_id = obj['artistId']
         album_id = obj['collectionId']
 
@@ -72,7 +72,7 @@ def harryData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        releaseDate = int(obj['releaseDate'][:4])
         artist_id = obj['artistId']
         album_id = obj['collectionId']
 
@@ -105,7 +105,7 @@ def drakeData(cur, conn):
             trackName = obj["trackName"]
             artistName= obj["artistName"]
             album = obj['collectionName']
-            releaseDate = obj['releaseDate']
+            releaseDate = int(obj['releaseDate'][:4])
             artist_id = obj['artistId']
             album_id = obj['collectionId']
 
@@ -122,7 +122,7 @@ def drakeData(cur, conn):
             trackName = obj["trackName"]
             artistName= obj["artistName"]
             album = obj['collectionName']
-            releaseDate = obj['releaseDate']
+            releaseDate = int(obj['releaseDate'][:4])
             artist_id = obj['artistId']
             album_id = obj['collectionId']
 
@@ -155,7 +155,7 @@ def drakeData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        releaseDate = int(obj['releaseDate'][:4])
         artist_id = obj['artistId']
         album_id = obj['collectionId']
 
@@ -187,7 +187,7 @@ def noahData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        releaseDate = int(obj['releaseDate'][:4])
         artist_id = obj['artistId']
         album_id = obj['collectionId']
 
@@ -219,7 +219,7 @@ def macData(cur, conn):
         trackName = obj["trackName"]
         artistName= obj["artistName"]
         album = obj['collectionName']
-        releaseDate = obj['releaseDate']
+        releaseDate = int(obj['releaseDate'][:4])
         artist_id = obj['artistId']
         album_id = obj['collectionId']
 
@@ -235,6 +235,19 @@ def macData(cur, conn):
     conn.commit()
 
 
+# Here is where I want to do calculations and JOIN the artist table with the taylorHarry and the release date -- then for my calculation, I want to take the releaseDate and see which artist released the most in which year
+
+
+def joiningTables(cur, conn):
+
+    joinThis = cur.execute("SELECT artist.artistsName, taylorHarry.artist_id, taylorHarry.releaseDate FROM artist JOIN taylorHarry ON taylorHarry.artist_id = artist.artistsName")
+    conn.commit()
+
+    names_and_dates = joinThis.fetchall()
+
+    print(names_and_dates)
+
+
 def main():
     # SETUP DATABASE AND TABLE
     cur, conn = setUpDatabase('music.db')
@@ -246,6 +259,7 @@ def main():
     drakeData(cur, conn)
     noahData(cur, conn)
     macData(cur, conn)
+    # joiningTables(cur, conn)
 
 if __name__ == "__main__":
     main()
