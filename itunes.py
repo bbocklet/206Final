@@ -2,6 +2,7 @@ import requests
 import unittest
 import sqlite3
 import json
+import csv
 import os
 import matplotlib.pyplot as plt
 
@@ -35,6 +36,7 @@ def taylorData(cur, conn):
     # print(dataTaylor)
     song_id = cur.execute('SELECT COUNT(song_id) FROM taylorHarry').fetchone()[0] + 1
     start = song_id
+    end = 25
     taylorStart = start // 5
     taylorEnd = taylorStart + 5
 
@@ -238,14 +240,152 @@ def macData(cur, conn):
 # Here is where I want to do calculations and JOIN the artist table with the taylorHarry and the release date -- then for my calculation, I want to take the releaseDate and see which artist released the most in which year
 
 
-def joiningTables(cur, conn):
+def join_calc_visual(cur, conn):
 
-    joinThis = cur.execute("SELECT artist.artistsName, taylorHarry.artist_id, taylorHarry.releaseDate FROM artist JOIN taylorHarry ON taylorHarry.artist_id = artist.artistsName")
+    cur.execute("SELECT artist.artistsName, taylorHarry.artist_id, taylorHarry.releaseDate FROM artist JOIN taylorHarry ON taylorHarry.artist_id = artist.artist_id")
     conn.commit()
 
-    names_and_dates = joinThis.fetchall()
+    names_and_dates = cur.fetchall()
 
     print(names_and_dates)
+
+    theMost = {}
+    totalSongs = 0
+
+# calculating who released the most music in 2012-22
+    for tuple in names_and_dates:
+        if tuple[2] == 2012:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2013:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2014:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2015:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2016:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2017:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2018:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2019:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2020:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2021:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+        if tuple[2] == 2022:
+            if tuple[0] not in theMost:
+                theMost[tuple[0]] = 0
+            theMost[tuple[0]] += 1
+            totalSongs += 1
+    
+    print(theMost)
+    print(totalSongs)
+
+    percentages = {}
+# taking the total percentage
+    for key in theMost:
+        percentages[key] = round((theMost[key] / totalSongs) * 100,2)
+
+# make the pie chart values
+
+# lables need to be the artist name and sizes will be the percentage
+    
+    # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+
+    if 'Taylor Swift' in theMost.keys():
+        taylorVal = theMost['Taylor Swift']
+    else:
+        taylorVal = 0
+
+    if 'Harry Styles' in theMost.keys():
+        harryVal = theMost['Harry Styles']
+    else:
+        harryVal = 0
+
+    if 'Drake' in theMost.keys():
+        drakeVal = theMost['Drake']
+    else:
+        drakeVal = 0
+
+    if 'Noah Kahan' in theMost.keys():
+        noahVal = theMost['Noah Kahan']
+    else:
+        noahVal = 0
+    
+    if 'Gryffin, Seven Lions & Noah Kahan' in theMost.keys():
+        noahVal2 = theMost['Gryffin, Seven Lions & Noah Kahan']
+    else:
+        noahVal2 = 0
+    
+    if 'Mac Miller' in theMost.keys():
+        macVal = theMost['Mac Miller']
+    else:
+        macVal = 0
+
+    if 'One Direction' in theMost.keys():
+        oneVal = theMost['One Direction']
+    else:
+        oneVal = 0
+
+    labels = 'Taylor Swift', 'Harry Styles', 'Drake', 'Gryffin, Seven Lions & Noah Kahan', 'Noah Kahan', 'Mac Miller', 'One Direction'
+    sizes = [taylorVal, harryVal, drakeVal, noahVal2, noahVal, macVal, oneVal]
+    explode = (0, 0, 0, 0, 0, 0, 0)  
+
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90)
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    plt.show()
+    return percentages
+
+   
+     
+
+def writeFile(data, file_name):
+
+    header = "Artists Contribution to Music 2012-2022 by Percent"
+
+    with open(file_name, "w") as f:
+        f.write(header)
+        f.write("\n")
+        for artist in data:
+            f.write(artist + ": " + str(data[artist]) + "%")
+            f.write("\n")
+
+
 
 
 def main():
@@ -259,16 +399,9 @@ def main():
     drakeData(cur, conn)
     noahData(cur, conn)
     macData(cur, conn)
-    # joiningTables(cur, conn)
+    join_calc_visual(cur, conn)
+    writeFile(join_calc_visual(cur, conn), "blairData.csv")
 
 if __name__ == "__main__":
     main()
 
-
-    #  check data to database, insert 25 into database at a time
-    # select max or select count from the column 
-    #  im going to insert -- make sure not duplicated!!
-
-
-    #  when end > 50, go to 50 rather than end
-    # read in artist and album, create those tables first -- where you are inserting the artist into the table, i need to use JOIN
