@@ -36,7 +36,6 @@ def taylorData(cur, conn):
     # print(dataTaylor)
     song_id = cur.execute('SELECT COUNT(song_id) FROM taylorHarry').fetchone()[0] + 1
     start = song_id
-    end = 25
     taylorStart = start // 5
     taylorEnd = taylorStart + 5
 
@@ -64,7 +63,7 @@ def harryData(cur, conn):
                             {'term': 'Harry Styles','media' : 'music'})
 
     dataHarry = responseHarry.json()
-    # print(dataTaylor)
+    
     song_id = cur.execute('SELECT COUNT(song_id) FROM taylorHarry').fetchone()[0] + 1
     start = song_id
     harryStart = start // 5
@@ -85,58 +84,6 @@ def harryData(cur, conn):
         cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artist_id, trackName, album_id, releaseDate) VALUES (?,?,?,?,?)', (song_id, artist_id, trackName, album_id, releaseDate))
 
         song_id += 1
-
-      
-    conn.commit()
-
-
-def drakeData(cur, conn):
-    responseHarry = requests.get('https://itunes.apple.com/search?', params= 
-                            {'term': 'Drake','media' : 'music'})
-
-    dataDrake = responseHarry.json()
-    # print(dataTaylor)
-    song_id = cur.execute('SELECT COUNT(song_id) FROM taylorHarry').fetchone()[0] + 1
-    start = song_id
-    drakeStart = start // 5
-    drakeEnd = drakeStart + 5
-
-    if song_id == 85:
-        drakeEnd = drakeStart + 6
-        for obj in dataDrake["results"][drakeStart:drakeEnd]:
-            trackName = obj["trackName"]
-            artistName= obj["artistName"]
-            album = obj['collectionName']
-            releaseDate = int(obj['releaseDate'][:4])
-            artist_id = obj['artistId']
-            album_id = obj['collectionId']
-
-            cur.execute('INSERT OR IGNORE INTO artist (artist_id, artistsName) VALUES (?,?)', ( artist_id, artistName))
-
-            cur.execute('INSERT OR IGNORE INTO albums (album_id, albumName) VALUES (?,?)', ( album_id, album))
-
-            cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artist_id, trackName, album_id, releaseDate) VALUES (?,?,?,?,?)', (song_id, artist_id, trackName, album_id, releaseDate))
-
-            song_id += 1
-    
-    else:
-        for obj in dataDrake["results"][drakeStart:drakeEnd]:
-            trackName = obj["trackName"]
-            artistName= obj["artistName"]
-            album = obj['collectionName']
-            releaseDate = int(obj['releaseDate'][:4])
-            artist_id = obj['artistId']
-            album_id = obj['collectionId']
-
-            cur.execute('INSERT OR IGNORE INTO artist (artist_id, artistsName) VALUES (?,?)', ( artist_id, artistName))
-
-            cur.execute('INSERT OR IGNORE INTO albums (album_id, albumName) VALUES (?,?)', ( album_id, album))
-
-            cur.execute('INSERT OR IGNORE INTO taylorHarry (song_id, artist_id, trackName, album_id, releaseDate) VALUES (?,?,?,?,?)', (song_id, artist_id, trackName, album_id, releaseDate))
-
-            song_id += 1
-
-
 
       
     conn.commit()
@@ -210,7 +157,7 @@ def macData(cur, conn):
                             {'term': 'Mac Miller','media' : 'music'})
 
     dataMac = responseHarry.json()
-    # print(dataNoah)
+
     
     song_id = cur.execute('SELECT COUNT(song_id) FROM taylorHarry').fetchone()[0] + 1
     start = song_id
@@ -247,7 +194,7 @@ def join_calc_visual(cur, conn):
 
     names_and_dates = cur.fetchall()
 
-    print(names_and_dates)
+    # print(names_and_dates)
 
     theMost = {}
     totalSongs = 0
@@ -310,8 +257,8 @@ def join_calc_visual(cur, conn):
             theMost[tuple[0]] += 1
             totalSongs += 1
     
-    print(theMost)
-    print(totalSongs)
+    # print(theMost)
+    # print(totalSongs)
 
     percentages = {}
 # taking the total percentage
@@ -325,6 +272,11 @@ def join_calc_visual(cur, conn):
     else:
         taylorVal = 0
 
+    if 'One Direction' in theMost.keys():
+        oneVal = percentages['One Direction']
+    else:
+        oneVal = 0
+
     if 'Harry Styles' in theMost.keys():
         harryVal = percentages['Harry Styles']
     else:
@@ -334,26 +286,23 @@ def join_calc_visual(cur, conn):
         drakeVal = percentages['Drake']
     else:
         drakeVal = 0
+    
+    if 'Gryffin, Seven Lions & Noah Kahan' in theMost.keys():
+        noahVal2 = percentages['Gryffin, Seven Lions & Noah Kahan']
+    else:
+        noahVal2 = 0
 
     if 'Noah Kahan' in theMost.keys():
         noahVal = percentages['Noah Kahan']
     else:
         noahVal = 0
     
-    if 'Gryffin, Seven Lions & Noah Kahan' in theMost.keys():
-        noahVal2 = percentages['Gryffin, Seven Lions & Noah Kahan']
-    else:
-        noahVal2 = 0
-    
     if 'Mac Miller' in theMost.keys():
         macVal = percentages['Mac Miller']
     else:
         macVal = 0
 
-    if 'One Direction' in theMost.keys():
-        oneVal = percentages['One Direction']
-    else:
-        oneVal = 0
+
 
     labels = 'Taylor Swift', 'One Direction', 'Harry Styles', 'Drake', 'Gryffin, Seven Lions & Noah Kahan', 'Noah Kahan', 'Mac Miller'
     sizes = [taylorVal, oneVal, harryVal, drakeVal, noahVal2, noahVal, macVal]
@@ -367,7 +316,14 @@ def join_calc_visual(cur, conn):
     plt.show()
     return percentages
 
-   
+
+def second_calc_visual(cur, conn):
+    cur.execute("SELECT taylorHarry.album_id, taylorHarry.trackName, albums.albumName FROM artist JOIN taylorHarry ON taylorHarry.album_id = albums.album_id")
+    conn.commit()
+
+    albums_and_songs = cur.fetchall()
+
+    print(albums_and_songs)
      
 
 def writeFile(data, file_name):
@@ -397,6 +353,7 @@ def main():
     macData(cur, conn)
     writeFile(join_calc_visual(cur, conn), "blairData.csv")
     join_calc_visual(cur, conn)
+    # second_calc_visual(cur, conn)
 
 if __name__ == "__main__":
     main()
