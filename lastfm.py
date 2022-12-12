@@ -15,155 +15,166 @@ def setUpDatabase(db_name):
     cur = conn.cursor()
     return cur, conn
 
-
-def create_taylor_table(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS taylor_table3 (song_id INTEGER, artist TEXT, rank INTEGER, track_title TEXT PRIMARY KEY,playcount INTEGER, listeners INTEGER)")
+def create_artist_table(cur,conn,data_list):
+    cur.execute("CREATE TABLE IF NOT EXISTS artist_table (artist_id INTEGER PRIMARY KEY, artist_name TEXT)")
+    artist_list = ['Taylor Swift', "Justin Bieber", 'Drake', 'Adele']
+    id = 1
+    for i in artist_list:
+        # artist_name = i[0]
+        cur.execute("INSERT OR IGNORE INTO artist_table(artist_id, artist_name) VALUES (?,?)", (id, i))
+        id+= 1
     conn.commit()
 
-def create_justin_table(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS justin_table3 (song_id INTEGER, artist TEXT, rank INTEGER, track_title TEXT PRIMARY KEY,playcount INTEGER, listeners INTEGER)")
-    conn.commit()
+def create_compiled_table(cur,conn,data_list):
+    cur.execute("CREATE TABLE IF NOT EXISTS compiled_table (id INTEGER PRIMARY KEY, artist_id INTEGER, song_title TEXT, rank INTEGER, playcount INTEGER, listeners INTEGER)")
+    count = cur.execute("SELECT MAX(id) FROM compiled_table").fetchone()[0]
+    if count == None:
+        count = 0
+    for i in range(count, count+25):
+        try:
+            # id = i
+            artist_id = cur.execute("SELECT artist_id FROM artist_table WHERE artist_name = ?", (data_list[i][0], )).fetchone()[0]
+            rank = data_list[i][1]
+            song_title = data_list[i][2]
+            playcount = data_list[i][3]
+            listeners = data_list[i][4]
+            cur.execute('INSERT OR IGNORE INTO compiled_table(id, artist_id, song_title, rank, playcount, listeners) VALUES (?,?,?,?,?,?)', (i, artist_id, song_title, rank, playcount, listeners))
+        except:
+            print('100 items exist')
 
-def create_drake_table(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS drake_table3 (song_id INTEGER, artist TEXT, rank INTEGER, track_title TEXT PRIMARY KEY,playcount INTEGER, listeners INTEGER)")
-    conn.commit()
-
-def create_adele_table(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS adele_table3 (song_id INTEGER, artist TEXT, rank INTEGER, track_title TEXT PRIMARY KEY,playcount INTEGER, listeners INTEGER)")
-    conn.commit()
-
-def get_taylor_data(cur,conn):
-    link = 'http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=taylorswift&api_key={}&limit=25&format=json'.format(API_KEY)
-    topsongdict_taylor = requests.get(link)
-    dataTaylor = topsongdict_taylor.json()
-
-    song_id = cur.execute('SELECT COUNT(song_id) FROM taylor_table3').fetchone()[0] + 1
-    start = song_id
-    print(dataTaylor)
-    global data_list
-    data_list = []
-    song_id = 0
-    for obj in dataTaylor["toptracks"]['track']:
-        track_title = obj['name']
-        artist = obj['artist']['name']
-        playcount = int(obj['playcount'])
-        listeners = int(obj['listeners'])
-        rank = int(obj['@attr']['rank'])
-        song_id += 1
-        tup1 = (song_id,artist, rank, track_title,playcount, listeners)
-        print(tup1)
-        data_list.append(tup1)
-
-        cur.execute('INSERT OR IGNORE INTO taylor_table3 (song_id, artist, rank, track_title, playcount, listeners) VALUES (?,?,?,?,?,?)', (song_id, artist, rank, track_title, playcount, listeners))
-
-    #print(data_list)
-    # return(data_list)
-
-    conn.commit()
-
-        # cur.execute('INSERT OR IGNORE INTO taylortable (rank, track_title, playcount, listeners) VALUES (?,?,?,?)', (rank, track_title, playcount, listeners))
-
-def get_justin_data(cur,conn):
-    link = 'http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=justinbieber&api_key={}&limit=25&format=json'.format(API_KEY)
-    topsongdict_justin = requests.get(link)
-    dataJustin = topsongdict_justin.json()
-
-    song_id = cur.execute('SELECT COUNT(song_id) FROM justin_table3').fetchone()[0] + 1
-    start = song_id
-    global data_list
-    data_list = []
-    song_id = 25
-    for obj in dataJustin["toptracks"]['track']:
-        track_title = obj['name']
-        artist = obj['artist']['name']
-        playcount = int(obj['playcount'])
-        listeners = int(obj['listeners'])
-        rank = int(obj['@attr']['rank'])
-        song_id += 1
-        tup1 = (song_id, artist, rank, track_title,playcount, listeners)
-        print(tup1)
-        data_list.append(tup1)
-
-        cur.execute('INSERT OR IGNORE INTO justin_table3 (song_id, artist, rank, track_title, playcount, listeners) VALUES (?,?,?,?,?,?)', (song_id, artist, rank, track_title, playcount, listeners))
 
     conn.commit()
 
 
-def get_drake_data(cur,conn):
-    link = 'http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=drake&api_key={}&limit=25&format=json'.format(API_KEY)
-    topsongdict_drake = requests.get(link)
-    dataDrake = topsongdict_drake.json()
+def get_data():
+    artist_list = ['taylorswift', 'justinbieber', 'drake', 'adele']
+    global combined_all_data
+    combined_all_data = []
+    for i in artist_list:
+        link = 'http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist={}&api_key={}&limit=25&format=json'.format(i,API_KEY)
+        topsongdict = requests.get(link)
+        dataArtist = json.loads(topsongdict.text)
 
-    song_id = cur.execute('SELECT COUNT(song_id) FROM drake_table3').fetchone()[0] + 1
-    start = song_id
-    global data_list
-    data_list = []
-    song_id = 50
-    for obj in dataDrake["toptracks"]['track']:
-        track_title = obj['name']
-        artist = obj['artist']['name']
-        playcount = int(obj['playcount'])
-        listeners = int(obj['listeners'])
-        rank = int(obj['@attr']['rank'])
-        song_id += 1
-        tup1 = (song_id, artist, rank, track_title,playcount, listeners)
-        print(tup1)
-        data_list.append(tup1)
+        for obj in dataArtist["toptracks"]['track']:
+            track_title = obj['name']
+            artist = obj['artist']['name']
+            playcount = int(obj['playcount'])
+            listeners = int(obj['listeners'])
+            rank = int(obj['@attr']['rank'])
+            # song_id += 1
+            tup1 = (artist, rank, track_title,playcount, listeners)
+            combined_all_data.append(tup1)
+    print(combined_all_data)
+    return combined_all_data
 
-        cur.execute('INSERT OR IGNORE INTO drake_table3 (song_id, artist, rank, track_title, playcount, listeners) VALUES (?,?,?,?,?,?)', (song_id, artist, rank, track_title, playcount, listeners))
 
-    conn.commit()
+def tables_visuals(cur, conn, data_list, show):
 
-def get_adele_data(cur,conn):
-    link = 'http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=adele&api_key={}&limit=25&format=json'.format(API_KEY)
-    topsongdict_adele = requests.get(link)
-    dataAdele = topsongdict_adele.json()
+# first visualization: bar chart
 
-    song_id = cur.execute('SELECT COUNT(song_id) FROM adele_table3').fetchone()[0] + 1
-    start = song_id
-    global data_list
-    data_list = []
-    song_id = 75
-    for obj in dataAdele["toptracks"]['track']:
-        track_title = obj['name']
-        artist = obj['artist']['name']
-        playcount = int(obj['playcount'])
-        listeners = int(obj['listeners'])
-        rank = int(obj['@attr']['rank'])
-        song_id += 1
-        tup1 = (song_id, artist,rank, track_title,playcount, listeners)
-        print(tup1)
-        data_list.append(tup1)
+    global perc_diff_list
+    perc_diff_list = []
+    playcount_list = []
+    listeners_list = []
+    global diff_list
+    diff_list = []
 
-        cur.execute('INSERT OR IGNORE INTO adele_table3 (song_id, artist, rank, track_title, playcount, listeners) VALUES (?,?,?,?,?,?)', (song_id, artist, rank, track_title, playcount, listeners))
+    top_taylor = data_list[0]
+    top_justin = data_list[25]
+    top_drake = data_list[50]
+    top_adele = data_list[75]
+    data_tup = (top_taylor,top_justin,top_drake,top_adele)
+    #print(data_tup)
 
-    conn.commit()
+    for i in data_tup:
+        playcount = i[3]
+        listeners = i[4]
+        # print(playcount)
+        # print(listeners)
+        average = (playcount + listeners)/2
+        diff = abs(playcount - listeners)
+        perc_diff = (diff/average) * 100
+        round_perc_diff = round(perc_diff, 2)
+        #print(round_perc_diff)
+        playcount_list.append(playcount)
+        listeners_list.append(listeners)
+        perc_diff_list.append(round_perc_diff)
+        diff_list.append(diff)
 
-def joiningTables(cur, conn):
+    taylor = top_taylor[0]
+    justin = top_justin[0]
+    drake = top_drake[0]
+    adele = top_adele[0]
+    global artist_list
+    artist_list = []
+    artist_list.extend([taylor,justin,drake,adele])
 
-    # joinThis = cur.execute("SELECT taylor_table3.song_id, taylor_table3.artist, taylor_table3.track_title,taylor_table3.playcount, taylor_table3.listeners, justin_table3.song_id, justin_table3.artist, justin_table3.track_title,justin_table3.playcount, justin_table3.listeners FROM taylor_table3 JOIN justin_table3 ON justin_table3.rank = taylor_table3.rank")
-    joinThis = cur.execute('INSERT INTO taylor_table3(song_id, artist, rank, track_title, playcount, listeners) SELECT song_id, artist, rank, track_title, playcount, listeners FROM justin_table3')
-    joinThis2 = cur.execute('INSERT INTO taylor_table3(song_id, artist, rank, track_title, playcount, listeners) SELECT song_id, artist, rank, track_title, playcount, listeners FROM drake_table3')
-    joinThis3 = cur.execute('INSERT INTO taylor_table3(song_id, artist, rank, track_title, playcount, listeners) SELECT song_id, artist, rank, track_title, playcount, listeners FROM adele_table3')
 
-    conn.commit()
+    fig, ax = plt.subplots()
 
-    # names_and_dates = joinThis.fetchall()
+    N = 4
+    width = 0.25
+    ind = np.arange(N)
 
-    # print(names_and_dates)
+    p1 = ax.bar(ind, playcount_list, width, color = 'green')
+
+    p2 = ax.bar(ind+width, listeners_list, width, color = 'blue')
+
+    p3 = ax.bar(ind+0.505, diff_list, width, color = 'yellow')
+
+    ax.set_xticks(ind + width / 2)
+    ax.set_xticklabels(('Taylor Swift', 'Justin Bieber', 'Drake', 'Adele'))
+    ax.legend((p1[0],p2[0],p3[0]), ('Playcount', 'Listeners','Difference'))
+    ax.autoscale_view()
+
+    ax.set(xlabel='Artist', ylabel='Amount', title = "Difference of Playcount vs. Listeners \n for Artists' Top Songs")
+
+    ax.grid()
+
+    plt.show()   
+
+def second_visualization(data, show):
+    box_plot_tup =[]
+    taylor_playcount = []
+    adele_playcount = []
+    taylor_data = combined_all_data[0:25]
+    for i in taylor_data:
+        playcount_t = i[3]
+        taylor_playcount.append(playcount_t)
+    #print(taylor_playcount)
+    adele_data = combined_all_data[75:]
+    for i in adele_data:
+        playcount_a = i[3]
+        adele_playcount.append(playcount_a)
+
+    data = [taylor_playcount, adele_playcount]
+
+    plt.boxplot(data,patch_artist=True, labels=['Taylor Swift', 'Adele'])
+    plt.title("Box Plot Comparing Taylor Swift vs. Adele \n Playcount for Top 25 Songs")    
+
+    plt.show()
+
+def writeFile(data, file_name):
+
+    header = "Difference and Percent Difference of Playcount vs. Listeners for Artists' Top Songs"
+
+    with open(file_name, "w") as f:
+        f.write(header)
+        f.write("\n")
+
+        for i in range(len(artist_list)):
+            f.write(artist_list[i] + ": " + str(diff_list[i]) + " Percent Difference = " + str(perc_diff_list[i]) + "%")
+            f.write("\n")
 
 def main():
     # SETUP DATABASE AND TABLE
     cur, conn = setUpDatabase('music.db')
-    create_taylor_table(cur, conn)
-    get_taylor_data(cur, conn)
-    create_justin_table(cur, conn)
-    get_justin_data(cur,conn)
-    create_drake_table(cur,conn)
-    get_drake_data(cur,conn)
-    create_adele_table(cur, conn)
-    get_adele_data(cur,conn)
-    joiningTables(cur, conn)
+    combined_all_data = get_data()
+    create_artist_table(cur,conn,combined_all_data)
+    create_compiled_table(cur,conn,combined_all_data)
+    tables_visuals(cur, conn, combined_all_data, True)
+    second_visualization(combined_all_data, True)
+    writeFile(perc_diff_list, 'AlexData1.csv')
 
 if __name__ == "__main__":
     main()
