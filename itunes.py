@@ -323,6 +323,8 @@ def join_calc_visual(cur, conn, show):
             shadow=True, startangle=90, colors=["#BC4B51","#DD614A", "#F7CB15", "#2A4494", "#76BED0", "#D2D6EF", "#85CC66"])
     ax1.axis('equal') 
 
+    plt.title("Artists Contribution to Music \n" + "2012-2022 by Percent", size=8, weight = 'bold')
+
     if show == True:
         plt.show()
     
