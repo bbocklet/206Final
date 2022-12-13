@@ -64,7 +64,7 @@ def get_data():
             # song_id += 1
             tup1 = (artist, rank, track_title,playcount, listeners)
             combined_all_data.append(tup1)
-    print(combined_all_data)
+    #print(combined_all_data)
     return combined_all_data
 
 
